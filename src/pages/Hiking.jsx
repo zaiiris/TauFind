@@ -74,6 +74,16 @@ export default function Hiking() {
         active: nextScenario.status === "emergency",
         type: nextScenario.status === "emergency" ? "fall-detected" : null,
         acknowledged: false,
+        currentScenario: "fallDetected",
+        stage: "detecting",
+        analysisProgress: 0,
+        countdown: 10,
+        rescueSignal: {
+          status: "idle",
+          progress: 0,
+          offlineMode: true,
+          received: false,
+        },
       },
     });
   };

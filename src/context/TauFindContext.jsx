@@ -34,6 +34,16 @@ function createInitialState() {
         active: false,
         type: null,
         acknowledged: false,
+        currentScenario: "fallDetected",
+        stage: "detecting",
+        analysisProgress: 0,
+        countdown: 10,
+        rescueSignal: {
+          status: "idle",
+          progress: 0,
+          offlineMode: true,
+          received: false,
+        },
       },
     },
     hiking: {
@@ -83,6 +93,10 @@ function loadStoredState() {
         emergencyState: {
           ...initialTauFindState.safety.emergencyState,
           ...parsed.state.safety?.emergencyState,
+          rescueSignal: {
+            ...initialTauFindState.safety.emergencyState.rescueSignal,
+            ...parsed.state.safety?.emergencyState?.rescueSignal,
+          },
         },
         settings: {
           ...initialTauFindState.safety.settings,
@@ -150,6 +164,26 @@ export function TauFindProvider({ children }) {
     }));
   }, []);
 
+  const updateEmergency = useCallback((updates) => {
+    setState((current) => {
+      const currentEmergency = current.safety.emergencyState;
+      const nextUpdates = typeof updates === "function" ? updates(currentEmergency) : updates;
+      return {
+        ...current,
+        safety: {
+          ...current.safety,
+          emergencyState: {
+            ...currentEmergency,
+            ...nextUpdates,
+            rescueSignal: nextUpdates.rescueSignal
+              ? { ...currentEmergency.rescueSignal, ...nextUpdates.rescueSignal }
+              : currentEmergency.rescueSignal,
+          },
+        },
+      };
+    });
+  }, []);
+
   const loadDemoScenario = useCallback(() => {
     setState({
       ...createInitialState(),
@@ -176,8 +210,8 @@ export function TauFindProvider({ children }) {
   const resetTauFind = useCallback(() => setState(createInitialState()), []);
 
   const value = useMemo(
-    () => ({ state, updateUser, updateTrip, updateSafety, updateHiking, loadDemoScenario, resetTauFind }),
-    [state, updateUser, updateTrip, updateSafety, updateHiking, loadDemoScenario, resetTauFind],
+    () => ({ state, updateUser, updateTrip, updateSafety, updateHiking, updateEmergency, loadDemoScenario, resetTauFind }),
+    [state, updateUser, updateTrip, updateSafety, updateHiking, updateEmergency, loadDemoScenario, resetTauFind],
   );
 
   return <TauFindContext.Provider value={value}>{children}</TauFindContext.Provider>;
