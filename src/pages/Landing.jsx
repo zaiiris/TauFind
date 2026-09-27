@@ -6,14 +6,12 @@ import {
   Play,
   RadioTower,
   ShieldPlus,
-  Sparkles,
   UserRound,
   Watch,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import Button from "../components/Button";
 import Card from "../components/Card";
-import { useTauFind } from "../context/TauFindContext";
 
 const networkSteps = [
   { icon: UserRound, label: "Hiker", detail: "On the trail" },
@@ -30,20 +28,6 @@ const predictionSignals = [
 ];
 
 export default function Landing() {
-  const navigate = useNavigate();
-  const { loadDemoScenario, updateDemoPresentation } = useTauFind();
-
-  const startDemo = () => {
-    loadDemoScenario();
-    navigate("/prepare");
-  };
-
-  const startInteractiveDemo = () => {
-    loadDemoScenario();
-    updateDemoPresentation({ active: true, playing: true, stageIndex: 0, completed: false });
-    navigate("/hiking");
-  };
-
   return (
     <div className="tau-container py-14 md:py-20 lg:py-24">
       <section className="grid items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16">
@@ -82,17 +66,16 @@ export default function Landing() {
             initial={{ opacity: 0, y: 12 }}
             transition={{ delay: 0.3 }}
           >
-            <Button as={Link} size="lg" to="/profile">
-              Start safety setup
+            <Button as={Link} size="lg" to="/register">
+              Get Started
               <ArrowRight aria-hidden="true" className="size-4" />
             </Button>
-            <Button onClick={startDemo} size="lg" variant="secondary">
+            <Button as={Link} size="lg" to="/demo" variant="ai">
               <Play aria-hidden="true" className="size-4 fill-current" />
-              Run demo scenario
+              Watch Demo
             </Button>
-            <Button onClick={startInteractiveDemo} size="lg" variant="ai">
-              <Sparkles aria-hidden="true" className="size-4" />
-              Run TauFind Demo
+            <Button as={Link} size="lg" to="/profile" variant="secondary">
+              Existing safety setup
             </Button>
           </motion.div>
 
@@ -163,6 +146,27 @@ export default function Landing() {
             </div>
           </div>
         </Card>
+      </section>
+
+      <section className="mt-16 scroll-mt-28" id="how-it-works">
+        <div className="max-w-2xl">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-ai-500">How it works</p>
+          <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-forest-900 md:text-5xl">One safety path, before and after signal disappears.</h2>
+        </div>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {["Preparation", "AI Risk Analysis", "Bracelet", "Offline Rescue"].map((step, index) => (
+            <Card className="relative h-full overflow-hidden" key={step}>
+              <span className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-ai-500">0{index + 1}</span>
+              <h3 className="mt-4 font-display text-xl font-semibold text-forest-900">{step}</h3>
+              <p className="mt-2 text-sm leading-6 text-forest-800/52">{[
+                "Build a safety profile and prepare the route.",
+                "Understand deterministic risk before departure.",
+                "Monitor movement, health, and environment live.",
+                "Relay verified incidents to rescue through LoRa.",
+              ][index]}</p>
+            </Card>
+          ))}
+        </div>
       </section>
 
       <section className="mt-16 grid gap-5 lg:grid-cols-[0.78fr_1.22fr]">

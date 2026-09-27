@@ -59,6 +59,14 @@ function createInitialState() {
       stageIndex: 0,
       completed: false,
     },
+    platform: {
+      currentRole: null,
+      authentication: {
+        isAuthenticated: false,
+        email: "",
+      },
+      language: "en",
+    },
     demoMode: false,
   };
 }
@@ -113,6 +121,14 @@ function loadStoredState() {
       demoPresentation: {
         ...initialTauFindState.demoPresentation,
         ...parsed.state.demoPresentation,
+      },
+      platform: {
+        ...initialTauFindState.platform,
+        ...parsed.state.platform,
+        authentication: {
+          ...initialTauFindState.platform.authentication,
+          ...parsed.state.platform?.authentication,
+        },
       },
       demoMode: Boolean(parsed.state.demoMode),
     };
@@ -204,9 +220,48 @@ export function TauFindProvider({ children }) {
     }));
   }, []);
 
+  const updatePlatform = useCallback((updates) => {
+    setState((current) => ({
+      ...current,
+      platform: {
+        ...current.platform,
+        ...(typeof updates === "function" ? updates(current.platform) : updates),
+      },
+    }));
+  }, []);
+
+  const selectRole = useCallback((currentRole) => {
+    setState((current) => ({
+      ...current,
+      platform: { ...current.platform, currentRole },
+    }));
+  }, []);
+
+  const authenticate = useCallback(({ email, role }) => {
+    setState((current) => ({
+      ...current,
+      platform: {
+        ...current.platform,
+        currentRole: role ?? current.platform.currentRole ?? "hiker",
+        authentication: { isAuthenticated: true, email },
+      },
+    }));
+  }, []);
+
+  const logout = useCallback(() => {
+    setState((current) => ({
+      ...current,
+      platform: {
+        ...current.platform,
+        authentication: { ...current.platform.authentication, isAuthenticated: false },
+      },
+    }));
+  }, []);
+
   const loadDemoScenario = useCallback(() => {
-    setState({
+    setState((current) => ({
       ...createInitialState(),
+      platform: current.platform,
       user: {
         name: "Amina Sarsen",
         age: "17",
@@ -224,14 +279,14 @@ export function TauFindProvider({ children }) {
         equipment: ["water", "first-aid", "warm-layers", "navigation"],
       },
       demoMode: true,
-    });
+    }));
   }, []);
 
   const resetTauFind = useCallback(() => setState(createInitialState()), []);
 
   const value = useMemo(
-    () => ({ state, updateUser, updateTrip, updateSafety, updateHiking, updateEmergency, updateDemoPresentation, loadDemoScenario, resetTauFind }),
-    [state, updateUser, updateTrip, updateSafety, updateHiking, updateEmergency, updateDemoPresentation, loadDemoScenario, resetTauFind],
+    () => ({ state, updateUser, updateTrip, updateSafety, updateHiking, updateEmergency, updateDemoPresentation, updatePlatform, selectRole, authenticate, logout, loadDemoScenario, resetTauFind }),
+    [state, updateUser, updateTrip, updateSafety, updateHiking, updateEmergency, updateDemoPresentation, updatePlatform, selectRole, authenticate, logout, loadDemoScenario, resetTauFind],
   );
 
   return <TauFindContext.Provider value={value}>{children}</TauFindContext.Provider>;
