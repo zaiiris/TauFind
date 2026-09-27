@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Siren,
   Snowflake,
+  Sparkles,
   TriangleAlert,
 } from "lucide-react";
 import { Link } from "react-router";
@@ -19,7 +20,9 @@ import Bracelet from "../components/Bracelet";
 import Button from "../components/Button";
 import Card from "../components/Card";
 import RiskScore from "../components/RiskScore";
+import SafetyTimeline from "../components/SafetyTimeline";
 import SensorCard from "../components/SensorCard";
+import { getHikerRisk } from "../ai/hikerRisk";
 import { useTauFind } from "../context/TauFindContext";
 import { getRouteById } from "../data/routes";
 import { getSensorScenario } from "../data/sensorSimulation";
@@ -43,11 +46,12 @@ function formatDuration(totalSeconds) {
   return [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
 }
 
-export default function Hiking() {
+export default function Hiking({ platformMode = false }) {
   const { state, updateHiking, updateSafety } = useTauFind();
   const { hiking, trip, user } = state;
   const selectedRoute = getRouteById(trip.selectedRoute);
   const scenario = getSensorScenario(hiking.scenario);
+  const platformRisk = getHikerRisk(state);
   const activeMode = scenario.status === "emergency" ? "emergency" : scenario.status === "warning" ? "warning" : "normal";
 
   useEffect(() => {
@@ -96,7 +100,7 @@ export default function Hiking() {
           <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-ai-500">Live hiking mode</p>
           <h1 className="mt-3 font-display text-3xl font-semibold text-forest-900">Plan a route before going live</h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-forest-800/55">TauFind needs a selected trail to place the hiker and begin bracelet monitoring.</p>
-          <Button as={Link} className="mt-7" to="/prepare">Choose a route<ArrowRight className="size-4" /></Button>
+          <Button as={Link} className="mt-7" to={platformMode ? "/hiker/trips" : "/prepare"}>Choose a route<ArrowRight className="size-4" /></Button>
         </Card>
       </div>
     );
@@ -112,8 +116,8 @@ export default function Hiking() {
     <div className="tau-container py-8 md:py-12">
       <header className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-ai-500"><motion.span animate={{ opacity: [1, 0.35, 1] }} className="size-2 rounded-full bg-safe-500" transition={{ duration: 1.6, repeat: Infinity }} />Live mountain monitoring</div>
-          <h1 className="mt-3 font-display text-4xl font-semibold tracking-[-0.035em] text-forest-900 md:text-5xl">Your trail, continuously understood.</h1>
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-ai-500"><motion.span animate={{ opacity: [1, 0.35, 1] }} className="size-2 rounded-full bg-safe-500" transition={{ duration: 1.6, repeat: Infinity }} />{platformMode ? "Active protection" : "Live mountain monitoring"}</div>
+          <h1 className="mt-3 font-display text-4xl font-semibold tracking-[-0.035em] text-forest-900 md:text-5xl">{platformMode ? `${selectedRoute.name}, protected live.` : "Your trail, continuously understood."}</h1>
           <p className="mt-3 max-w-2xl text-base leading-7 text-forest-800/58">Bracelet telemetry, route position, and risk signals stay connected through LoRa—even where mobile coverage disappears.</p>
         </div>
         <div className="flex items-center gap-3 rounded-2xl border border-forest-800/9 bg-white/65 px-4 py-3">
@@ -122,10 +126,18 @@ export default function Hiking() {
         </div>
       </header>
 
+      {platformMode && (
+        <div className="mt-7 grid gap-3 sm:grid-cols-3">
+          <div className="flex items-center gap-3 rounded-2xl border border-safe-500/18 bg-emerald-50/75 p-4"><span className="grid size-10 place-items-center rounded-xl bg-safe-500 text-white"><ShieldCheck className="size-5" /></span><div><p className="text-[0.6rem] font-bold uppercase tracking-wider text-forest-800/38">Protection status</p><p className="text-sm font-semibold text-forest-900">Active Monitoring</p></div></div>
+          <div className="flex items-center gap-3 rounded-2xl border border-forest-800/8 bg-white/65 p-4"><span className="grid size-10 place-items-center rounded-xl bg-forest-800 text-white"><Activity className="size-5" /></span><div><p className="text-[0.6rem] font-bold uppercase tracking-wider text-forest-800/38">Bracelet</p><p className="text-sm font-semibold text-forest-900">{scenario.sensors.connection}</p></div></div>
+          <div className="flex items-center gap-3 rounded-2xl border border-ai-500/14 bg-ai-100/65 p-4"><span className="grid size-10 place-items-center rounded-xl bg-ai-500 text-white"><Sparkles className="size-5" /></span><div><p className="text-[0.6rem] font-bold uppercase tracking-wider text-forest-800/38">AI monitoring</p><p className="text-sm font-semibold text-forest-900">Running</p></div></div>
+        </div>
+      )}
+
       <Card className="mt-7" padding="p-4 md:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-forest-800/42">Judge demo controls</p>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-forest-800/42">{platformMode ? "Protection simulation" : "Judge demo controls"}</p>
             <p className="mt-1 text-sm text-forest-800/55">Switch conditions to see TauFind detect and respond in real time.</p>
           </div>
           <div className="grid grid-cols-3 gap-2" role="group" aria-label="Simulation scenario">
@@ -190,6 +202,17 @@ export default function Hiking() {
             <SensorCard icon={Clock3} label="Duration" tone="default" trend="Live session time" value={formatDuration(hiking.elapsedSeconds)} />
             <SensorCard icon={MapPinned} label="Route progress" tone={activeMode === "emergency" ? "emergency" : "ai"} trend={selectedRoute.region} unit="%" value={Math.round(progress)} />
           </div>
+
+          {platformMode && (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <SensorCard icon={HeartPulse} label="Heart rate" tone={scenario.sensors.heartRate >= 150 || scenario.sensors.heartRate < 50 ? "emergency" : "safe"} trend="Bracelet sensor" unit="bpm" value={scenario.sensors.heartRate} />
+              <SensorCard icon={Snowflake} label="Temperature" tone={scenario.sensors.temperature <= -5 ? "warning" : "ai"} trend="Ambient reading" unit="°C" value={scenario.sensors.temperature} />
+              <SensorCard icon={Navigation} label="GPS" tone="safe" trend="Current location" value={scenario.sensors.gps} />
+              <SensorCard icon={Radio} label="LoRa" tone="ai" trend="Offline protection" value={scenario.sensors.lora} />
+            </div>
+          )}
+
+          {platformMode && <SafetyTimeline />}
         </div>
 
         <div className="space-y-6">
@@ -197,15 +220,15 @@ export default function Hiking() {
           <Card>
             <div className="flex flex-col items-center text-center">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-ai-500">Live safety risk</p>
-              <RiskScore className="mt-4" score={scenario.riskScore} size={158} />
-              <p className="mt-4 text-sm leading-6 text-forest-800/55">Risk changes with sensor and environmental signals—not random demo values.</p>
+              <RiskScore className="mt-4" score={platformMode ? platformRisk?.score ?? scenario.riskScore : scenario.riskScore} size={158} />
+              <p className="mt-4 text-sm leading-6 text-forest-800/55">{platformMode ? "Current trip risk comes from the existing explainable engine; live sensors are monitored separately for emergency conditions." : "Risk changes with sensor and environmental signals—not random demo values."}</p>
             </div>
             <div className="mt-5 grid grid-cols-2 gap-3 border-t border-forest-800/8 pt-5 text-center">
               <div><p className="text-[0.6rem] uppercase tracking-wider text-forest-800/40">Movement</p><p className="mt-1 text-xs font-semibold text-forest-900">{scenario.sensors.movement}</p></div>
               <div><p className="text-[0.6rem] uppercase tracking-wider text-forest-800/40">Last packet</p><p className="mt-1 text-xs font-semibold text-forest-900">Now · LoRa</p></div>
             </div>
             {activeMode === "emergency" ? (
-              <Button as={Link} className="mt-5 w-full" size="lg" to="/emergency" variant="emergency">Open rescue response<Siren className="size-4" /></Button>
+              <div className="mt-5 rounded-2xl border border-emergency-500/18 bg-emergency-100 p-4"><p className="text-sm font-bold text-emergency-500">{platformMode ? "Potential emergency detected" : "Emergency condition detected"}</p><Button as={Link} className="mt-3 w-full" size="lg" to={platformMode ? "/hiker/emergency" : "/emergency"} variant="emergency">{platformMode ? "Open Emergency Status" : "Open rescue response"}<Siren className="size-4" /></Button></div>
             ) : (
               <div className="mt-5 flex items-center justify-center gap-2 rounded-2xl bg-emerald-50 p-3 text-xs font-semibold text-safe-500"><ShieldCheck className="size-4" />Automatic monitoring is active</div>
             )}

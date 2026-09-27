@@ -1,10 +1,11 @@
 import { Navigate, Route, Routes } from "react-router";
-import { Bluetooth, Compass, HeartPulse, LayoutDashboard, Map, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, Map, ShieldAlert } from "lucide-react";
 import AppShell from "./components/AppShell";
 import Dashboard from "./pages/Dashboard";
 import Demo from "./pages/Demo";
 import Emergency from "./pages/Emergency";
 import Hiking from "./pages/Hiking";
+import HikerBracelet from "./pages/HikerBracelet";
 import HikerDashboard from "./pages/HikerDashboard";
 import HikerProfile from "./pages/HikerProfile";
 import HikerTrips from "./pages/HikerTrips";
@@ -30,9 +31,9 @@ export default function App() {
         <Route path="hiker/profile" element={<HikerProfile />} />
         <Route path="hiker/trips" element={<HikerTrips />} />
         <Route path="hiker/risk-analysis" element={<RiskAnalysis />} />
-        <Route path="hiker/bracelet" element={<RolePlaceholder icon={Bluetooth} purpose="Pair the TauFind wearable and review GPS, battery, sensor, and LoRa readiness." role="Hiker" title="Bracelet connection" />} />
-        <Route path="hiker/live" element={<RolePlaceholder icon={Compass} purpose="Follow route progress and live safety signals during an active hiking session." role="Hiker" title="Live hiking" />} />
-        <Route path="hiker/emergency" element={<RolePlaceholder icon={HeartPulse} purpose="Understand emergency verification and offline rescue activation from the hiker view." role="Hiker" title="Emergency support" />} />
+        <Route path="hiker/bracelet" element={<HikerBracelet />} />
+        <Route path="hiker/live" element={<Hiking platformMode />} />
+        <Route path="hiker/emergency" element={<Emergency />} />
 
         <Route path="rescue/dashboard" element={<RolePlaceholder icon={LayoutDashboard} purpose="Monitor operational status, active incidents, and response priorities from one rescue workspace." role="Rescue Team" title="Rescue dashboard" />} />
         <Route path="rescue/incidents" element={<RolePlaceholder icon={ShieldAlert} purpose="Review incoming emergency packets, tourist condition, confidence, and incident history." role="Rescue Team" title="Incident queue" />} />
