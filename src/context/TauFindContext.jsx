@@ -23,6 +23,7 @@ function createInitialState() {
     },
     safety: {
       riskScore: 12,
+      riskAnalysis: null,
       currentStatus: "safe",
       settings: {
         fallDetection: true,

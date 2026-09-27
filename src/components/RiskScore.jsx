@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 
 function getRiskMeta(score) {
-  if (score >= 70) return { label: "High risk", color: "#e63946" };
-  if (score >= 35) return { label: "Medium risk", color: "#d9a441" };
+  if (score >= 75) return { label: "Critical risk", color: "#e63946" };
+  if (score >= 55) return { label: "High risk", color: "#d55a3a" };
+  if (score >= 30) return { label: "Medium risk", color: "#d9a441" };
   return { label: "Low risk", color: "#2e8b57" };
 }
 
