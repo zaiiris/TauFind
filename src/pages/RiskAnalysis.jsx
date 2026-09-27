@@ -255,7 +255,10 @@ export default function RiskAnalysis() {
             <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-3xl border border-forest-800/9 bg-white/55 p-4 sm:flex-row">
               <Button as={Link} className="w-full sm:w-auto" to="/prepare" variant="ghost"><ArrowLeft className="size-4" />Adjust preparation</Button>
               <div className="text-center sm:text-right"><p className="text-sm font-semibold text-forest-900">{selectedRoute.name} · {formatDate(trip.date)}</p><p className="mt-0.5 text-xs text-forest-800/42">Analysis saved to your safety plan</p></div>
-              <Button className="w-full sm:w-auto" onClick={() => { setActiveStage(0); setAnalysisComplete(false); setAnalysisRun((run) => run + 1); }} variant="secondary"><RefreshCw className="size-4" />Run again</Button>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <Button className="w-full sm:w-auto" onClick={() => { setActiveStage(0); setAnalysisComplete(false); setAnalysisRun((run) => run + 1); }} variant="secondary"><RefreshCw className="size-4" />Run again</Button>
+                <Button as={Link} className="w-full sm:w-auto" to="/hiking">Enter live mode<ChevronRight className="size-4" /></Button>
+              </div>
             </div>
           </motion.div>
         )}

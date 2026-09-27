@@ -36,6 +36,13 @@ function createInitialState() {
         acknowledged: false,
       },
     },
+    hiking: {
+      active: true,
+      scenario: "normal",
+      warningScenario: "highHeartRate",
+      progress: 36,
+      elapsedSeconds: 5220,
+    },
     demoMode: false,
   };
 }
@@ -82,6 +89,7 @@ function loadStoredState() {
           ...parsed.state.safety?.settings,
         },
       },
+      hiking: { ...initialTauFindState.hiking, ...parsed.state.hiking },
       demoMode: Boolean(parsed.state.demoMode),
     };
   } catch {
@@ -132,6 +140,16 @@ export function TauFindProvider({ children }) {
     }));
   }, []);
 
+  const updateHiking = useCallback((updates) => {
+    setState((current) => ({
+      ...current,
+      hiking: {
+        ...current.hiking,
+        ...(typeof updates === "function" ? updates(current.hiking) : updates),
+      },
+    }));
+  }, []);
+
   const loadDemoScenario = useCallback(() => {
     setState({
       ...createInitialState(),
@@ -158,8 +176,8 @@ export function TauFindProvider({ children }) {
   const resetTauFind = useCallback(() => setState(createInitialState()), []);
 
   const value = useMemo(
-    () => ({ state, updateUser, updateTrip, updateSafety, loadDemoScenario, resetTauFind }),
-    [state, updateUser, updateTrip, updateSafety, loadDemoScenario, resetTauFind],
+    () => ({ state, updateUser, updateTrip, updateSafety, updateHiking, loadDemoScenario, resetTauFind }),
+    [state, updateUser, updateTrip, updateSafety, updateHiking, loadDemoScenario, resetTauFind],
   );
 
   return <TauFindContext.Provider value={value}>{children}</TauFindContext.Provider>;
