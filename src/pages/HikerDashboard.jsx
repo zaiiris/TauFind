@@ -7,6 +7,7 @@ import Card from "../components/Card";
 import { useTauFind } from "../context/TauFindContext";
 import { getRouteById } from "../data/routes";
 import { sensorScenarios } from "../data/sensorSimulation";
+import { useI18n } from "../i18n/I18nContext";
 
 function greeting() {
   const hour = new Date().getHours();
@@ -15,9 +16,9 @@ function greeting() {
   return "Good evening";
 }
 
-function formatTripDate(value) {
+function formatTripDate(value, locale = "en") {
   if (!value) return "Date not selected";
-  return new Intl.DateTimeFormat("en", { day: "numeric", month: "long" }).format(new Date(`${value}T12:00:00`));
+  return new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en", { day: "numeric", month: "long" }).format(new Date(`${value}T12:00:00`));
 }
 
 const riskTone = {
@@ -29,6 +30,7 @@ const riskTone = {
 
 export default function HikerDashboard() {
   const { state } = useTauFind();
+  const { language } = useI18n();
   const route = getRouteById(state.trip.selectedRoute);
   const risk = getHikerRisk(state);
   const preparationScore = getPreparationScore(state);
@@ -56,7 +58,7 @@ export default function HikerDashboard() {
             <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-emerald-200/55"><Mountain className="size-4" />Upcoming adventure</p>
             <h2 className="mt-4 font-display text-3xl font-semibold md:text-4xl">{route?.name || "Plan your next mountain"}</h2>
             <div className="mt-5 flex flex-wrap gap-x-7 gap-y-3 text-sm text-emerald-100/58">
-              <span className="flex items-center gap-2"><CalendarDays className="size-4 text-emerald-300" />{formatTripDate(state.trip.date)}</span>
+              <span className="flex items-center gap-2"><CalendarDays className="size-4 text-emerald-300" />{formatTripDate(state.trip.date, language)}</span>
               <span className="flex items-center gap-2"><Compass className="size-4 text-emerald-300" />{route?.difficulty || "Difficulty pending"}</span>
               {risk && <span className="flex items-center gap-2"><Sparkles className="size-4 text-sky-300" />{risk.riskLevel} risk · {risk.score}%</span>}
             </div>
@@ -76,7 +78,7 @@ export default function HikerDashboard() {
           <div className="flex items-start justify-between gap-4"><span className="grid size-11 place-items-center rounded-2xl bg-ai-100 text-ai-500"><MapPinned className="size-5" /></span>{risk && <span className={`rounded-full px-3 py-1.5 text-xs font-bold ${riskTone[risk.riskLevel]}`}>{risk.riskLevel} · {risk.score}%</span>}</div>
           <p className="mt-6 text-xs font-bold uppercase tracking-[0.16em] text-forest-800/38">Upcoming trip</p>
           <h3 className="mt-2 font-display text-2xl font-semibold text-forest-900">{route?.name || "No trip planned"}</h3>
-          <p className="mt-2 text-sm text-forest-800/50">{route ? `${formatTripDate(state.trip.date)} · ${route.difficulty}` : "Create a trip to start your safety plan."}</p>
+          <p className="mt-2 text-sm text-forest-800/50">{route ? `${formatTripDate(state.trip.date, language)} · ${route.difficulty}` : "Create a trip to start your safety plan."}</p>
           <div className="mt-5 flex items-center gap-2 border-t border-forest-800/8 pt-4 text-sm font-semibold text-forest-900"><CheckCircle2 className={`size-4 ${preparationScore >= 80 ? "text-safe-500" : "text-warning-500"}`} />{preparationScore >= 80 ? "Prepared" : "Preparation incomplete"}</div>
         </Card>
 

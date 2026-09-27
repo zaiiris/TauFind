@@ -26,6 +26,7 @@ import { useTauFind } from "../context/TauFindContext";
 import { calculateRisk } from "../ai/riskEngine";
 import { getRouteById } from "../data/routes";
 import { simulationScenarios } from "../data/simulationData";
+import { useI18n } from "../i18n/I18nContext";
 
 const analysisStages = [
   { label: "Reading safety profile", detail: "Experience and personal readiness" },
@@ -59,9 +60,9 @@ function parseRouteWeather(weather = "") {
   };
 }
 
-function formatDate(value) {
+function formatDate(value, language) {
   if (!value) return "Date not set";
-  return new Intl.DateTimeFormat("en", {
+  return new Intl.DateTimeFormat(language === "ru" ? "ru-RU" : "en", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -70,6 +71,7 @@ function formatDate(value) {
 
 export default function RiskAnalysis() {
   const { state, updateSafety } = useTauFind();
+  const { language } = useI18n();
   const { trip, user } = state;
   const selectedRoute = getRouteById(trip.selectedRoute);
   const [analysisRun, setAnalysisRun] = useState(0);
@@ -254,7 +256,7 @@ export default function RiskAnalysis() {
 
             <div className="mt-7 flex flex-col items-center justify-between gap-4 rounded-3xl border border-forest-800/9 bg-white/55 p-4 sm:flex-row">
               <Button as={Link} className="w-full sm:w-auto" to="/prepare" variant="ghost"><ArrowLeft className="size-4" />Adjust preparation</Button>
-              <div className="text-center sm:text-right"><p className="text-sm font-semibold text-forest-900">{selectedRoute.name} · {formatDate(trip.date)}</p><p className="mt-0.5 text-xs text-forest-800/42">Analysis saved to your safety plan</p></div>
+              <div className="text-center sm:text-right"><p className="text-sm font-semibold text-forest-900">{selectedRoute.name} · {formatDate(trip.date, language)}</p><p className="mt-0.5 text-xs text-forest-800/42">Analysis saved to your safety plan</p></div>
               <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                 <Button className="w-full sm:w-auto" onClick={() => { setActiveStage(0); setAnalysisComplete(false); setAnalysisRun((run) => run + 1); }} variant="secondary"><RefreshCw className="size-4" />Run again</Button>
                 <Button as={Link} className="w-full sm:w-auto" to="/hiking">Enter live mode<ChevronRight className="size-4" /></Button>

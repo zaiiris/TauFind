@@ -1,7 +1,10 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router";
 import DemoController from "./DemoController";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
+import LoadingScreen from "./LoadingScreen";
 
 function MountainBackdrop() {
   return (
@@ -19,9 +22,16 @@ function MountainBackdrop() {
 
 export default function AppShell() {
   const location = useLocation();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLoading(false), 650);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   return (
     <div className="relative min-h-screen overflow-x-clip bg-sand-100 text-forest-900">
+      <AnimatePresence>{loading && <LoadingScreen />}</AnimatePresence>
       <div aria-hidden="true" className="tau-grid-overlay pointer-events-none fixed inset-0 opacity-70" />
       <div aria-hidden="true" className="pointer-events-none fixed -left-24 top-24 size-80 rounded-full bg-ai-500/7 blur-3xl" />
       <div aria-hidden="true" className="pointer-events-none fixed -right-24 top-1/2 size-96 rounded-full bg-forest-700/7 blur-3xl" />
@@ -36,6 +46,7 @@ export default function AppShell() {
           <Outlet />
         </motion.div>
       </main>
+      <Footer />
       <DemoController />
       <MountainBackdrop />
     </div>
