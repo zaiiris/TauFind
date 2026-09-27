@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Outlet, useLocation } from "react-router";
+import DemoController from "./DemoController";
 import Navbar from "./Navbar";
 
 function MountainBackdrop() {
@@ -35,6 +36,7 @@ export default function AppShell() {
           <Outlet />
         </motion.div>
       </main>
+      <DemoController />
       <MountainBackdrop />
     </div>
   );

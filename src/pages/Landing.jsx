@@ -6,6 +6,7 @@ import {
   Play,
   RadioTower,
   ShieldPlus,
+  Sparkles,
   UserRound,
   Watch,
 } from "lucide-react";
@@ -30,11 +31,17 @@ const predictionSignals = [
 
 export default function Landing() {
   const navigate = useNavigate();
-  const { loadDemoScenario } = useTauFind();
+  const { loadDemoScenario, updateDemoPresentation } = useTauFind();
 
   const startDemo = () => {
     loadDemoScenario();
     navigate("/prepare");
+  };
+
+  const startInteractiveDemo = () => {
+    loadDemoScenario();
+    updateDemoPresentation({ active: true, playing: true, stageIndex: 0, completed: false });
+    navigate("/hiking");
   };
 
   return (
@@ -82,6 +89,10 @@ export default function Landing() {
             <Button onClick={startDemo} size="lg" variant="secondary">
               <Play aria-hidden="true" className="size-4 fill-current" />
               Run demo scenario
+            </Button>
+            <Button onClick={startInteractiveDemo} size="lg" variant="ai">
+              <Sparkles aria-hidden="true" className="size-4" />
+              Run TauFind Demo
             </Button>
           </motion.div>
 

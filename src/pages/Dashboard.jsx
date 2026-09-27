@@ -23,6 +23,7 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import { useTauFind } from "../context/TauFindContext";
 import { getEmergencyScenario } from "../data/emergencySimulation";
+import { demoScenario } from "../data/demoScenario";
 import { getRouteById } from "../data/routes";
 
 const priorityMeta = {
@@ -104,28 +105,43 @@ export default function Dashboard() {
   const emergencyState = state.safety.emergencyState;
   const scenario = getEmergencyScenario(emergencyState.currentScenario);
   const decision = detectEmergency(scenario.input);
+  const guidedIncident = state.demoPresentation.active && state.demoPresentation.stageIndex === demoScenario.stages.length - 1
+    ? demoScenario.rescueIncident
+    : null;
+  const displayedDecision = guidedIncident
+    ? {
+        ...decision,
+        emergency: true,
+        confidence: guidedIncident.confidence,
+        severity: guidedIncident.severity,
+        cause: guidedIncident.cause,
+        factors: guidedIncident.factors,
+        explanation: "TauFind correlated the fall, stopped movement, and abnormal indicators before transmitting the incident through LoRa.",
+      }
+    : decision;
+  const condition = guidedIncident?.condition ?? scenario.input;
   const route = getRouteById(state.trip.selectedRoute);
-  const priority = getPriority(decision.severity);
+  const priority = guidedIncident?.status ?? getPriority(displayedDecision.severity);
   const priorityStyle = priorityMeta[priority];
   const activeIncident = emergencyState.active || ["countdown", "transmitting", "received"].includes(emergencyState.stage);
   const signalReceived = emergencyState.rescueSignal.received || emergencyState.stage === "received";
-  const incidentId = `TF-${(route?.id || "MNT").slice(0, 3).toUpperCase()}-${scenario.id === "criticalOffline" ? "001" : "042"}`;
+  const incidentId = guidedIncident?.incidentId ?? `TF-${(route?.id || "MNT").slice(0, 3).toUpperCase()}-${scenario.id === "criticalOffline" ? "001" : "042"}`;
   const routeProgress = state.hiking.progress || 72;
 
   const recommendations = [
     {
-      title: decision.emergency ? "Dispatch the nearest mountain rescue unit" : "Maintain remote monitoring",
-      detail: decision.emergency ? `Treat this as ${priority.toLowerCase()} priority; estimated response ${scenario.rescue.eta || "is being calculated"}.` : "The evidence remains below the emergency threshold.",
+      title: displayedDecision.emergency ? "Dispatch the nearest mountain rescue unit" : "Maintain remote monitoring",
+      detail: displayedDecision.emergency ? `Treat this as ${priority.toLowerCase()} priority; estimated response ${scenario.rescue.eta || "is being calculated"}.` : "The evidence remains below the emergency threshold.",
       icon: ShieldAlert,
     },
     {
-      title: scenario.input.temperature <= 2 ? "Prepare cold-exposure medical support" : "Prepare standard trauma assessment",
-      detail: scenario.input.temperature <= 2 ? `${scenario.input.temperature}°C exposure increases hypothermia risk while the hiker is immobile.` : "Check the hiker for injury when contact is established.",
+      title: condition.temperature <= 2 ? "Prepare cold-exposure medical support" : "Prepare standard trauma assessment",
+      detail: condition.temperature <= 2 ? `${condition.temperature}°C exposure increases hypothermia risk while the hiker is immobile.` : "Check the hiker for injury when contact is established.",
       icon: Snowflake,
     },
     {
       title: "Navigate to the latest LoRa position",
-      detail: `Begin the search within the 180 m uncertainty radius at ${scenario.input.altitude.toLocaleString()} m altitude.`,
+      detail: `Begin the search within the 180 m uncertainty radius at ${condition.altitude.toLocaleString()} m altitude.`,
       icon: Navigation,
     },
   ];
@@ -157,15 +173,15 @@ export default function Dashboard() {
           <div>
             <div className="flex flex-wrap items-center gap-2"><span className={`rounded-full px-3 py-1.5 text-xs font-bold ${priorityStyle.badge}`}>{priority} PRIORITY</span><span className="rounded-full bg-forest-100 px-3 py-1.5 text-xs font-semibold text-forest-800">{signalReceived ? "Rescue signal received" : scenario.rescue.status}</span></div>
             <p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-forest-800/42">Active incident · {incidentId}</p>
-            <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-forest-900">{decision.cause}</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-forest-800/54">{decision.explanation}</p>
+            <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-forest-900">{displayedDecision.cause}</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-forest-800/54">{displayedDecision.explanation}</p>
             <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3 text-xs text-forest-800/50"><span className="flex items-center gap-2"><Clock3 className="size-4 text-ai-500" />Received via LoRa · now</span><span className="flex items-center gap-2"><Radio className="size-4 text-ai-500" />Packet integrity verified</span>{scenario.mobileNetwork === "Unavailable" && <span className="flex items-center gap-2"><WifiOff className="size-4 text-emergency-500" />Mobile network unavailable</span>}</div>
           </div>
           <div className="rounded-3xl border border-forest-800/8 bg-sand-50/72 p-5 text-center">
             <p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-forest-800/40">Emergency confidence</p>
-            <p className={`mt-2 font-display text-6xl font-semibold tracking-tight ${priorityStyle.color}`}>{decision.confidence}%</p>
-            <p className="mt-2 text-sm font-semibold text-forest-900">{decision.severity} severity</p>
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-forest-800/8"><motion.div animate={{ width: `${decision.confidence}%` }} className={`h-full rounded-full ${priorityStyle.bar}`} initial={false} /></div>
+            <p className={`mt-2 font-display text-6xl font-semibold tracking-tight ${priorityStyle.color}`}>{displayedDecision.confidence}%</p>
+            <p className="mt-2 text-sm font-semibold text-forest-900">{displayedDecision.severity} severity</p>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-forest-800/8"><motion.div animate={{ width: `${displayedDecision.confidence}%` }} className={`h-full rounded-full ${priorityStyle.bar}`} initial={false} /></div>
           </div>
         </div>
       </Card>
@@ -174,11 +190,11 @@ export default function Dashboard() {
         <Card>
           <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.16em] text-ai-500">Tourist condition</p><h2 className="mt-2 font-display text-2xl font-semibold text-forest-900">{state.user.name || "Unknown tourist"}</h2><p className="mt-1 text-xs text-forest-800/45">Bracelet telemetry · last packet now</p></div><span className="grid size-11 place-items-center rounded-2xl bg-forest-100 text-forest-800"><UserRound className="size-5" /></span></div>
           <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
-            <ConditionMetric alert={scenario.input.heartRate <= 45 || scenario.input.heartRate >= 150} icon={HeartPulse} label="Heart rate" value={`${scenario.input.heartRate} bpm`} />
-            <ConditionMetric alert={scenario.input.temperature <= 2} icon={Snowflake} label="Temperature" value={`${scenario.input.temperature}°C`} />
-            <ConditionMetric alert={/no movement|unresponsive/i.test(scenario.input.movementStatus)} icon={Activity} label="Movement" value={scenario.input.movementStatus} />
-            <ConditionMetric icon={Mountain} label="Altitude" value={`${scenario.input.altitude.toLocaleString()} m`} />
-            <ConditionMetric alert={scenario.input.battery <= 20} icon={BatteryMedium} label="Battery" value={`${scenario.input.battery}%`} />
+            <ConditionMetric alert={condition.heartRate <= 45 || condition.heartRate >= 140} icon={HeartPulse} label="Heart rate" value={`${condition.heartRate} bpm`} />
+            <ConditionMetric alert={condition.temperature <= 4} icon={Snowflake} label="Temperature" value={`${condition.temperature}°C`} />
+            <ConditionMetric alert={/no movement|unresponsive|stopped/i.test(condition.movementStatus)} icon={Activity} label="Movement" value={condition.movementStatus} />
+            <ConditionMetric icon={Mountain} label="Altitude" value={`${condition.altitude.toLocaleString()} m`} />
+            <ConditionMetric alert={condition.battery <= 20} icon={BatteryMedium} label="Battery" value={`${condition.battery}%`} />
             <ConditionMetric icon={MapPin} label="Route progress" value={`${Math.round(routeProgress)}%`} />
           </div>
         </Card>
@@ -196,7 +212,7 @@ export default function Dashboard() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <Card>
           <div className="flex items-start gap-3"><span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-ai-100 text-ai-500"><BrainCircuit className="size-5" /></span><div><p className="text-xs font-bold uppercase tracking-[0.16em] text-ai-500">AI rescue recommendation</p><h2 className="mt-1 font-display text-2xl font-semibold text-forest-900">Immediate action plan</h2></div></div>
-          <div className="mt-5 rounded-2xl border border-emergency-500/14 bg-emergency-100/45 p-4"><p className="text-sm font-semibold text-forest-900">{decision.emergency ? "Immediate rescue required because:" : "Continue monitoring because:"}</p><ul className="mt-3 space-y-2 text-sm text-forest-800/62">{decision.factors.slice(0, 4).map((factor) => <li className="flex gap-2" key={factor}><Check className="mt-0.5 size-4 shrink-0 text-emergency-500" />{factor}</li>)}</ul></div>
+          <div className="mt-5 rounded-2xl border border-emergency-500/14 bg-emergency-100/45 p-4"><p className="text-sm font-semibold text-forest-900">{guidedIncident?.recommendation ?? (displayedDecision.emergency ? "Immediate rescue required because:" : "Continue monitoring because:")}</p><ul className="mt-3 space-y-2 text-sm text-forest-800/62">{displayedDecision.factors.slice(0, 4).map((factor) => <li className="flex gap-2" key={factor}><Check className="mt-0.5 size-4 shrink-0 text-emergency-500" />{factor}</li>)}</ul></div>
           <div className="mt-5 space-y-3">
             {recommendations.map((recommendation, index) => {
               const Icon = recommendation.icon;

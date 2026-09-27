@@ -23,6 +23,7 @@ import Card from "../components/Card";
 import LoRaNetwork from "../components/LoRaNetwork";
 import { useTauFind } from "../context/TauFindContext";
 import { emergencyScenarios, getEmergencyScenario } from "../data/emergencySimulation";
+import { demoScenario, getDemoStage } from "../data/demoScenario";
 import { getRouteById } from "../data/routes";
 
 const scenarioOrder = ["minorWarning", "fallDetected", "criticalOffline"];
@@ -49,8 +50,15 @@ export default function Emergency() {
   const scenario = getEmergencyScenario(emergencyState.currentScenario);
   const route = getRouteById(state.trip.selectedRoute);
   const decision = useMemo(() => detectEmergency(scenario.input), [scenario]);
+  const guidedDemo = state.demoPresentation;
+  const guidedStage = getDemoStage(guidedDemo.stageIndex);
+  const guidedEmergencyVisible = guidedDemo.active && guidedDemo.stageIndex >= 3;
+  const displayedDecision = guidedDemo.active && guidedDemo.stageIndex >= 4
+    ? { ...decision, confidence: demoScenario.rescueIncident.confidence, severity: demoScenario.rescueIncident.severity, cause: "Possible fall detected" }
+    : decision;
 
   useEffect(() => {
+    if (guidedDemo.active) return undefined;
     if (emergencyState.stage === "detecting") {
       const timer = window.setTimeout(() => {
         updateEmergency({ stage: "verifying", analysisProgress: 0 });
@@ -110,7 +118,7 @@ export default function Emergency() {
     }
 
     return undefined;
-  }, [decision.emergency, emergencyState.stage, updateEmergency]);
+  }, [decision.emergency, emergencyState.stage, guidedDemo.active, updateEmergency]);
 
   const selectScenario = (scenarioId) => {
     const nextScenario = getEmergencyScenario(scenarioId);
@@ -168,6 +176,24 @@ export default function Emergency() {
         <div className="rounded-2xl border border-ai-500/15 bg-ai-100/65 px-4 py-3 text-xs leading-5 text-forest-800/60"><strong className="block text-forest-900">Hackathon simulation</strong>No real hardware or rescue service is connected.</div>
       </header>
 
+      {guidedEmergencyVisible && (
+        <motion.div animate={{ opacity: 1, y: 0 }} className="mt-7 overflow-hidden rounded-3xl border border-emergency-500/18 bg-white/72 shadow-card" initial={false}>
+          <div className="h-1.5 bg-emergency-500" />
+          <div className="grid gap-5 p-5 md:grid-cols-[1.2fr_0.8fr] md:items-center md:p-6">
+            <div>
+              <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-emergency-500"><Siren className="size-4" />Critical emergency</p>
+              <h2 className="mt-2 font-display text-3xl font-semibold text-forest-900">Possible fall detected</h2>
+              <p className="mt-2 text-sm text-forest-800/52">{guidedStage.description}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div className="rounded-2xl bg-emergency-100 p-3"><p className="text-[0.58rem] font-bold uppercase tracking-wider text-forest-800/40">AI confidence</p><p className="mt-1 font-display text-2xl font-semibold text-emergency-500">94%</p></div>
+              <div className="rounded-2xl bg-ai-100 p-3"><p className="text-[0.58rem] font-bold uppercase tracking-wider text-forest-800/40">Rescue signal</p><p className="mt-1 text-sm font-bold text-ai-500">{guidedDemo.stageIndex >= 4 ? "TRANSMITTING" : "VERIFYING"}</p></div>
+              <div className="col-span-2 flex items-center justify-center gap-2 rounded-2xl bg-forest-900 p-3 text-xs font-bold text-white"><WifiOff className="size-4 text-emerald-300" />Network: Offline LoRa Mode</div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       <Card className="mt-7" padding="p-4 md:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-forest-800/42">Emergency demo scenario</p><p className="mt-1 text-sm text-forest-800/55">Choose a case to replay the full detection workflow.</p></div>
@@ -217,10 +243,10 @@ export default function Emergency() {
             ) : (
               <motion.div animate={{ opacity: 1, y: 0 }} className="mt-6" initial={false}>
                 <div className="flex flex-col gap-4 rounded-2xl border border-forest-800/8 bg-sand-50/75 p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-forest-800/40">AI decision</p><p className="mt-1 font-display text-xl font-semibold text-forest-900">{decision.cause}</p><p className="mt-1 text-xs leading-5 text-forest-800/48">{decision.explanation}</p></div>
-                  <div className="shrink-0 text-left sm:text-right"><p className={`font-display text-4xl font-semibold ${decision.emergency ? "text-emergency-500" : "text-warning-500"}`}>{decision.confidence}%</p><p className="text-xs font-bold uppercase tracking-wider text-forest-800/42">{decision.severity}</p></div>
+                  <div><p className="text-[0.62rem] font-bold uppercase tracking-[0.14em] text-forest-800/40">AI decision</p><p className="mt-1 font-display text-xl font-semibold text-forest-900">{displayedDecision.cause}</p><p className="mt-1 text-xs leading-5 text-forest-800/48">{displayedDecision.explanation}</p></div>
+                  <div className="shrink-0 text-left sm:text-right"><p className={`font-display text-4xl font-semibold ${displayedDecision.emergency ? "text-emergency-500" : "text-warning-500"}`}>{displayedDecision.confidence}%</p><p className="text-xs font-bold uppercase tracking-wider text-forest-800/42">{displayedDecision.severity}</p></div>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2">{decision.factors.map((factor) => <span className="rounded-full bg-forest-100 px-3 py-1.5 text-xs font-semibold text-forest-800" key={factor}>{factor}</span>)}</div>
+                <div className="mt-4 flex flex-wrap gap-2">{displayedDecision.factors.map((factor) => <span className="rounded-full bg-forest-100 px-3 py-1.5 text-xs font-semibold text-forest-800" key={factor}>{factor}</span>)}</div>
               </motion.div>
             )}
           </Card>
