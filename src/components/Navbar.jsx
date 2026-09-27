@@ -14,8 +14,11 @@ const publicLinks = [
 
 const hikerLinks = [
   { label: "Dashboard", to: "/hiker/dashboard" },
+  { label: "Profile", to: "/hiker/profile" },
   { label: "My Trips", to: "/hiker/trips" },
+  { label: "Risk Analysis", to: "/hiker/risk-analysis" },
   { label: "Bracelet", to: "/hiker/bracelet" },
+  { label: "Live Hiking", to: "/hiker/live" },
   { label: "Emergency", to: "/hiker/emergency" },
 ];
 
@@ -66,11 +69,11 @@ export default function Navbar() {
       <nav aria-label="Primary navigation" className="tau-container flex h-18 items-center justify-between gap-6">
         <Brand />
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-1 lg:flex">
           {links.map((link) => <NavigationLink key={link.to} {...link} />)}
         </div>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-2 lg:flex">
           {authenticated ? (
             <>
               <div className="mr-1 text-right"><p className="text-[0.58rem] font-bold uppercase tracking-[0.15em] text-forest-800/36">Workspace</p><p className="text-xs font-semibold text-forest-900">{roleLabel}</p></div>
@@ -81,14 +84,14 @@ export default function Navbar() {
           )}
         </div>
 
-        <button aria-expanded={open} aria-label={open ? "Close navigation" : "Open navigation"} className="grid size-10 place-items-center rounded-full text-forest-900 hover:bg-forest-800/8 md:hidden" onClick={() => setOpen((current) => !current)} type="button">
+        <button aria-expanded={open} aria-label={open ? "Close navigation" : "Open navigation"} className="grid size-10 place-items-center rounded-full text-forest-900 hover:bg-forest-800/8 lg:hidden" onClick={() => setOpen((current) => !current)} type="button">
           {open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
         </button>
       </nav>
 
       <AnimatePresence>
         {open && (
-          <motion.div animate={{ height: "auto", opacity: 1 }} className="overflow-hidden border-t border-forest-800/8 bg-sand-50 md:hidden" exit={{ height: 0, opacity: 0 }} initial={{ height: 0, opacity: 0 }}>
+          <motion.div animate={{ height: "auto", opacity: 1 }} className="overflow-hidden border-t border-forest-800/8 bg-sand-50 lg:hidden" exit={{ height: 0, opacity: 0 }} initial={{ height: 0, opacity: 0 }}>
             <div className="tau-container flex flex-col gap-1 py-4">
               {authenticated && <div className="mb-2 rounded-xl bg-forest-100 px-3 py-2"><p className="text-[0.58rem] font-bold uppercase tracking-wider text-forest-800/38">Active workspace</p><p className="text-sm font-semibold text-forest-900">{roleLabel}</p></div>}
               {links.map((link) => <NavigationLink key={link.to} mobile onClick={() => setOpen(false)} {...link} />)}

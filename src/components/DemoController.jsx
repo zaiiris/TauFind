@@ -8,7 +8,7 @@ import Button from "./Button";
 
 export default function DemoController() {
   const navigate = useNavigate();
-  const { state, updateDemoPresentation, updateEmergency, updateHiking, updateSafety } = useTauFind();
+  const { endDemoPresentation, state, updateDemoPresentation, updateEmergency, updateHiking, updateSafety } = useTauFind();
   const demo = state.demoPresentation;
   const stage = getDemoStage(demo.stageIndex);
   const lastStage = demo.stageIndex === demoScenario.stages.length - 1;
@@ -51,7 +51,7 @@ export default function DemoController() {
             <Button aria-label={demo.playing ? "Pause demo" : "Start demo"} onClick={togglePlayback} size="sm" variant="ai">{demo.playing ? <Pause className="size-4" /> : <Play className="size-4" />}{demo.playing ? "Pause" : demo.completed ? "Replay" : "Start Demo"}</Button>
             <Button aria-label="Next demo stage" disabled={lastStage} onClick={next} size="sm" variant="secondary"><SkipForward className="size-4" /><span className="hidden sm:inline">Next</span></Button>
             <button aria-label="Restart demo" className="grid size-9 place-items-center rounded-full bg-white/8 text-white/70 transition hover:bg-white/14 hover:text-white" onClick={restart} type="button"><RotateCcw className="size-4" /></button>
-            <button aria-label="Close demo" className="grid size-9 place-items-center rounded-full bg-white/8 text-white/70 transition hover:bg-white/14 hover:text-white" onClick={() => updateDemoPresentation({ active: false, playing: false })} type="button"><X className="size-4" /></button>
+            <button aria-label="Close demo" className="grid size-9 place-items-center rounded-full bg-white/8 text-white/70 transition hover:bg-white/14 hover:text-white" onClick={endDemoPresentation} type="button"><X className="size-4" /></button>
           </div>
         </div>
 

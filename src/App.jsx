@@ -1,10 +1,13 @@
 import { Navigate, Route, Routes } from "react-router";
-import { Activity, Bluetooth, Compass, HeartPulse, LayoutDashboard, Map, MapPinned, ShieldAlert, UserRound } from "lucide-react";
+import { Bluetooth, Compass, HeartPulse, LayoutDashboard, Map, ShieldAlert } from "lucide-react";
 import AppShell from "./components/AppShell";
 import Dashboard from "./pages/Dashboard";
 import Demo from "./pages/Demo";
 import Emergency from "./pages/Emergency";
 import Hiking from "./pages/Hiking";
+import HikerDashboard from "./pages/HikerDashboard";
+import HikerProfile from "./pages/HikerProfile";
+import HikerTrips from "./pages/HikerTrips";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -23,10 +26,10 @@ export default function App() {
         <Route path="register" element={<Register />} />
         <Route path="demo" element={<Demo />} />
 
-        <Route path="hiker/dashboard" element={<RolePlaceholder icon={LayoutDashboard} purpose="A personal safety overview for upcoming trips, active monitoring, and preparation status." role="Hiker" title="Hiker dashboard" />} />
-        <Route path="hiker/profile" element={<RolePlaceholder icon={UserRound} purpose="Identity, experience, emergency contacts, and safety preferences for every mountain trip." role="Hiker" title="Safety profile" />} />
-        <Route path="hiker/trips" element={<RolePlaceholder icon={MapPinned} purpose="Plan, review, and organize mountain routes with preparation context in one place." role="Hiker" title="My trips" />} />
-        <Route path="hiker/risk-analysis" element={<RolePlaceholder icon={Activity} purpose="Review explainable preparation risk before entering a mountain route." role="Hiker" title="AI risk analysis" />} />
+        <Route path="hiker/dashboard" element={<HikerDashboard />} />
+        <Route path="hiker/profile" element={<HikerProfile />} />
+        <Route path="hiker/trips" element={<HikerTrips />} />
+        <Route path="hiker/risk-analysis" element={<RiskAnalysis />} />
         <Route path="hiker/bracelet" element={<RolePlaceholder icon={Bluetooth} purpose="Pair the TauFind wearable and review GPS, battery, sensor, and LoRa readiness." role="Hiker" title="Bracelet connection" />} />
         <Route path="hiker/live" element={<RolePlaceholder icon={Compass} purpose="Follow route progress and live safety signals during an active hiking session." role="Hiker" title="Live hiking" />} />
         <Route path="hiker/emergency" element={<RolePlaceholder icon={HeartPulse} purpose="Understand emergency verification and offline rescue activation from the hiker view." role="Hiker" title="Emergency support" />} />
