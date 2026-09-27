@@ -69,6 +69,10 @@ function createInitialState() {
       },
       language: "en",
     },
+    rescueOperation: {
+      stage: 0,
+      incidentId: null,
+    },
     demoMode: false,
   };
 }
@@ -132,6 +136,10 @@ function loadStoredState() {
           ...initialTauFindState.platform.authentication,
           ...parsed.state.platform?.authentication,
         },
+      },
+      rescueOperation: {
+        ...initialTauFindState.rescueOperation,
+        ...parsed.state.rescueOperation,
       },
       demoMode: Boolean(parsed.state.demoMode),
     };
@@ -254,6 +262,16 @@ export function TauFindProvider({ children }) {
     }));
   }, []);
 
+  const updateRescueOperation = useCallback((updates) => {
+    setState((current) => ({
+      ...current,
+      rescueOperation: {
+        ...current.rescueOperation,
+        ...(typeof updates === "function" ? updates(current.rescueOperation) : updates),
+      },
+    }));
+  }, []);
+
   const selectRole = useCallback((currentRole) => {
     setState((current) => ({
       ...current,
@@ -316,8 +334,8 @@ export function TauFindProvider({ children }) {
   const resetTauFind = useCallback(() => setState(createInitialState()), []);
 
   const value = useMemo(
-    () => ({ state, updateUser, updateTrip, updateSafety, updateHiking, updateEmergency, updateDemoPresentation, endDemoPresentation, updatePlatform, selectRole, authenticate, logout, loadDemoScenario, resetTauFind }),
-    [state, updateUser, updateTrip, updateSafety, updateHiking, updateEmergency, updateDemoPresentation, endDemoPresentation, updatePlatform, selectRole, authenticate, logout, loadDemoScenario, resetTauFind],
+    () => ({ state, updateUser, updateTrip, updateSafety, updateHiking, updateEmergency, updateDemoPresentation, endDemoPresentation, updatePlatform, updateRescueOperation, selectRole, authenticate, logout, loadDemoScenario, resetTauFind }),
+    [state, updateUser, updateTrip, updateSafety, updateHiking, updateEmergency, updateDemoPresentation, endDemoPresentation, updatePlatform, updateRescueOperation, selectRole, authenticate, logout, loadDemoScenario, resetTauFind],
   );
 
   return <TauFindContext.Provider value={value}>{children}</TauFindContext.Provider>;

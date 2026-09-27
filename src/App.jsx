@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router";
-import { LayoutDashboard, Map, ShieldAlert } from "lucide-react";
 import AppShell from "./components/AppShell";
+import RoleRoute from "./components/RoleRoute";
 import Dashboard from "./pages/Dashboard";
 import Demo from "./pages/Demo";
 import Emergency from "./pages/Emergency";
@@ -15,8 +15,13 @@ import NotFound from "./pages/NotFound";
 import Prepare from "./pages/Prepare";
 import Profile from "./pages/Profile";
 import Register from "./pages/Register";
+import RescueDashboard from "./pages/RescueDashboard";
+import RescueIncidentDetails from "./pages/RescueIncidentDetails";
+import RescueIncidents from "./pages/RescueIncidents";
+import RescueMap from "./pages/RescueMap";
+import RescueOperations from "./pages/RescueOperations";
+import RescueSettings from "./pages/RescueSettings";
 import RiskAnalysis from "./pages/RiskAnalysis";
-import RolePlaceholder from "./pages/RolePlaceholder";
 
 export default function App() {
   return (
@@ -27,17 +32,24 @@ export default function App() {
         <Route path="register" element={<Register />} />
         <Route path="demo" element={<Demo />} />
 
-        <Route path="hiker/dashboard" element={<HikerDashboard />} />
-        <Route path="hiker/profile" element={<HikerProfile />} />
-        <Route path="hiker/trips" element={<HikerTrips />} />
-        <Route path="hiker/risk-analysis" element={<RiskAnalysis />} />
-        <Route path="hiker/bracelet" element={<HikerBracelet />} />
-        <Route path="hiker/live" element={<Hiking platformMode />} />
-        <Route path="hiker/emergency" element={<Emergency />} />
+        <Route element={<RoleRoute role="hiker" />}>
+          <Route path="hiker/dashboard" element={<HikerDashboard />} />
+          <Route path="hiker/profile" element={<HikerProfile />} />
+          <Route path="hiker/trips" element={<HikerTrips />} />
+          <Route path="hiker/risk-analysis" element={<RiskAnalysis />} />
+          <Route path="hiker/bracelet" element={<HikerBracelet />} />
+          <Route path="hiker/live" element={<Hiking platformMode />} />
+          <Route path="hiker/emergency" element={<Emergency />} />
+        </Route>
 
-        <Route path="rescue/dashboard" element={<RolePlaceholder icon={LayoutDashboard} purpose="Monitor operational status, active incidents, and response priorities from one rescue workspace." role="Rescue Team" title="Rescue dashboard" />} />
-        <Route path="rescue/incidents" element={<RolePlaceholder icon={ShieldAlert} purpose="Review incoming emergency packets, tourist condition, confidence, and incident history." role="Rescue Team" title="Incident queue" />} />
-        <Route path="rescue/map" element={<RolePlaceholder icon={Map} purpose="Visualize last known positions, relay coverage, search areas, and rescue stations." role="Rescue Team" title="Operations map" />} />
+        <Route element={<RoleRoute role="rescue" />}>
+          <Route path="rescue/dashboard" element={<RescueDashboard />} />
+          <Route path="rescue/incidents" element={<RescueIncidents />} />
+          <Route path="rescue/incidents/:id" element={<RescueIncidentDetails />} />
+          <Route path="rescue/map" element={<RescueMap />} />
+          <Route path="rescue/operations" element={<RescueOperations />} />
+          <Route path="rescue/settings" element={<RescueSettings />} />
+        </Route>
 
         {/* Existing MVP routes remain available during the platform transition. */}
         <Route path="profile" element={<Profile />} />
