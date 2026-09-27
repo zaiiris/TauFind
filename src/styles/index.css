@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme {
+  --color-forest-950: #071f17;
+  --color-forest-900: #0a2b20;
+  --color-forest-800: #0f3d2e;
+  --color-forest-700: #17543f;
+  --color-forest-100: #dce8e1;
+  --color-sand-50: #fbf9f4;
+  --color-sand-100: #f4efe6;
+  --color-sand-200: #e8dfd0;
+  --color-ai-500: #457b9d;
+  --color-ai-100: #e3eff6;
+  --color-emergency-500: #e63946;
+  --color-emergency-100: #fbeaec;
+  --color-safe-500: #2e8b57;
+  --color-warning-500: #d9a441;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --shadow-card: 0 24px 70px -36px rgba(10, 43, 32, 0.35);
+  --radius-card: 1.25rem;
+}
+
+:root {
+  color: #0a2b20;
+  background: #f4efe6;
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --tau-surface: rgba(255, 255, 255, 0.82);
+  --tau-border: rgba(15, 61, 46, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(69, 123, 157, 0.38);
+  outline-offset: 3px;
+}
+
+::selection {
+  color: white;
+  background: #17543f;
+}
+
+.tau-container {
+  width: min(100% - 2rem, 76rem);
+  margin-inline: auto;
+}
+
+.tau-grid-overlay {
+  background-image:
+    linear-gradient(rgba(15, 61, 46, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 61, 46, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+@media (min-width: 768px) {
+  .tau-container {
+    width: min(100% - 4rem, 76rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
